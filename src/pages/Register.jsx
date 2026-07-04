@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../utils/toast';
 import { SALON_INFO } from '../utils/constants';
 import { registerClient } from '../api/auth';
 
@@ -49,7 +49,7 @@ const Register = () => {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <img src="/images/marca.jpg" alt={SALON_INFO.name} />
+          <img src="/images/marca.webp" alt={SALON_INFO.name} />
         </div>
         <h2 className="auth-title">Crear cuenta</h2>
         <p className="auth-subtitle">Registrate para reservar y gestionar tus citas</p>
