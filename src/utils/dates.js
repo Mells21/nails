@@ -28,10 +28,10 @@ export const to12h = (time24) => {
 };
 
 /**
- * Format price to Colombian pesos
+ * Format price to Peruvian soles
  */
 export const formatPrice = (amount) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
+  new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
 
 /**
  * Format duration in minutes to readable string

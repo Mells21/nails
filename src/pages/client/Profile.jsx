@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { updateOwnProfile } from '../../api/profiles';
 import { User, Phone, Mail, Heart, AlertTriangle, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// TODO: update client profile via Supabase
 const Profile = () => {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [form, setForm] = useState({
     name: profile?.name || '',
     phone: profile?.phone || '',
     favoriteColors: profile?.favoriteColors || '',
     allergies: profile?.allergies || '',
-    notes: profile?.notes || '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -21,7 +20,10 @@ const Profile = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      toast.error('Guardado no disponible: falta conectar el backend.');
+      await updateOwnProfile(user.id, form);
+      toast.success('Perfil actualizado ✅');
+    } catch (err) {
+      toast.error(err.message || 'Error al guardar.');
     } finally {
       setSaving(false);
     }
@@ -62,10 +64,6 @@ const Profile = () => {
           <div className="form-group">
             <label htmlFor="prof-allergies"><AlertTriangle size={14} /> Alergias o sensibilidades</label>
             <input id="prof-allergies" name="allergies" value={form.allergies} onChange={handleChange} placeholder="Ej: acrílico, ninguna..." />
-          </div>
-          <div className="form-group">
-            <label htmlFor="prof-notes">Notas adicionales</label>
-            <textarea id="prof-notes" name="notes" value={form.notes} onChange={handleChange} rows={3} placeholder="Cualquier detalle extra que quieras que sepamos..." />
           </div>
         </div>
 

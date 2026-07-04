@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllAppointments } from '../../api/appointments';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { Search } from 'lucide-react';
 import { APPOINTMENT_STATUSES } from '../../utils/constants';
 
-// TODO: fetch appointments from Supabase
 const AppointmentsList = () => {
-  const [appointments] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAllAppointments().then((data) => {
+      setAppointments(data);
+      setFiltered(data);
+    }).finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     let result = appointments;

@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { logout } from '../../api/auth';
 import {
   LayoutDashboard,
   Calendar,
@@ -8,6 +9,7 @@ import {
   LogOut,
   Sparkles,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { SALON_INFO } from '../../utils/constants';
 
 const navItems = [
@@ -21,8 +23,9 @@ const navItems = [
 const AdminSidebar = () => {
   const navigate = useNavigate();
 
-  // TODO: wire up Supabase auth (supabase.auth.signOut)
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
+    toast.success('Sesión cerrada');
     navigate('/');
   };
 

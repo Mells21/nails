@@ -1,82 +1,4 @@
 // ==============================================
-// SERVICES CATALOG
-// ==============================================
-export const SERVICES = [
-  {
-    id: 'gel_polish',
-    name: 'Esmaltado Permanente (Gel)',
-    description: 'Esmalte de larga duración, brillo intenso hasta 3 semanas.',
-    duration: 60,
-    price: 25000,
-    emoji: '💅',
-    color: '#f472b6',
-  },
-  {
-    id: 'rubber_base',
-    name: 'Rubber Base con Diseño',
-    description: 'Base de goma flexible con diseño personalizado.',
-    duration: 90,
-    price: 35000,
-    emoji: '🌸',
-    color: '#c084fc',
-  },
-  {
-    id: 'acrylic_natural',
-    name: 'Acrílico Natural',
-    description: 'Uñas de acrílico sin diseño, acabado natural o nude.',
-    duration: 120,
-    price: 50000,
-    emoji: '✨',
-    color: '#a78bfa',
-  },
-  {
-    id: 'acrylic_design',
-    name: 'Acrílico con Diseño',
-    description: 'Uñas de acrílico con diseño personalizado (nail art).',
-    duration: 150,
-    price: 65000,
-    emoji: '🎨',
-    color: '#818cf8',
-  },
-  {
-    id: 'french',
-    name: 'Francés (French Manicure)',
-    description: 'Clásico diseño francés en punta blanca con base nude.',
-    duration: 60,
-    price: 30000,
-    emoji: '🤍',
-    color: '#e2e8f0',
-  },
-  {
-    id: 'nail_art',
-    name: 'Diseño Adicional (Nail Art)',
-    description: 'Arte extra sobre cualquier servicio base.',
-    duration: 30,
-    price: 15000,
-    emoji: '🖌️',
-    color: '#fb7185',
-  },
-  {
-    id: 'acrylic_removal',
-    name: 'Retiro de Acrílico',
-    description: 'Remoción segura de uñas acrílicas.',
-    duration: 45,
-    price: 20000,
-    emoji: '🗑️',
-    color: '#6b7280',
-  },
-  {
-    id: 'repair',
-    name: 'Reparación de Uña',
-    description: 'Reparación de una uña quebrada o dañada.',
-    duration: 20,
-    price: 8000,
-    emoji: '🔧',
-    color: '#f59e0b',
-  },
-];
-
-// ==============================================
 // APPOINTMENT STATUSES
 // ==============================================
 export const APPOINTMENT_STATUSES = {
@@ -125,9 +47,9 @@ export const CANCELLATION_POLICY = `📌 *Políticas del salón:*
 // SALON INFO
 // ==============================================
 export const SALON_INFO = {
-  name: import.meta.env.VITE_SALON_NAME || 'Nail Studio',
-  address: import.meta.env.VITE_SALON_ADDRESS || 'Dirección del salón',
-  whatsapp: import.meta.env.VITE_SALON_WHATSAPP || '+57300000000',
+  name: 'AuraNails',
+  address: 'Jr. Raimondi 501, Rioja, San Martin, Peru',
+  whatsapp: '+51 928 432 432',
 };
 
 // ==============================================

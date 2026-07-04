@@ -1,58 +1,96 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getAvailableSlots } from '../../utils/slots';
+import { getEnabledDays } from '../../api/schedule';
+import { createAppointment, getBookedSlots } from '../../api/appointments';
+import { uploadReferencePhoto } from '../../api/storage';
 import ServiceSelector from '../../components/booking/ServiceSelector';
 import ReferenceUpload from '../../components/booking/ReferenceUpload';
 import BookingSummary from '../../components/booking/BookingSummary';
 import ManualPayment from '../../components/payment/ManualPayment';
-import { toDateStr, getWeekDays } from '../../utils/dates';
+import { buildAdminNotificationMessage } from '../../utils/whatsapp';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STEPS = ['Servicio', 'Fecha y hora', 'Fotos', 'Pago'];
 
-// TODO: fetch available weeks/booked slots and create appointment via Supabase
 const BookingPage = () => {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [referenceFiles, setReferenceFiles] = useState([]);
-  const [weeks] = useState([]);
+  const [enabledSchedule, setEnabledSchedule] = useState({});
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
   const [bookedSlots, setBookedSlots] = useState({});
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [appointmentCreated] = useState(false);
+  const [appointmentId, setAppointmentId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleDateSelect = (dateStr) => {
+  useEffect(() => {
+    getEnabledDays().then(setEnabledSchedule).finally(() => setLoadingSchedule(false));
+  }, []);
+
+  const handleDateSelect = async (dateStr) => {
     setSelectedDate(dateStr);
     setSelectedTime(null);
     setLoadingSlots(true);
-    setBookedSlots((prev) => ({ ...prev, [dateStr]: [] }));
-    setLoadingSlots(false);
+    try {
+      const booked = await getBookedSlots(dateStr);
+      setBookedSlots((prev) => ({ ...prev, [dateStr]: booked }));
+    } finally {
+      setLoadingSlots(false);
+    }
   };
 
   const getAvailableSlotsForDate = (dateStr) => {
-    if (!selectedService || !weeks.length) return [];
-    const week = weeks.find((w) => {
-      const days = getWeekDays(w.weekStart);
-      return days.some((d) => d.dateStr === dateStr);
-    });
-    if (!week) return [];
-    const dayConfig = week.days?.[dateStr];
-    return getAvailableSlots(dayConfig, selectedService.duration, bookedSlots[dateStr] || []);
+    if (!selectedService) return [];
+    return getAvailableSlots(enabledSchedule[dateStr], selectedService.duration, bookedSlots[dateStr] || []);
   };
 
   const handleCreateAppointment = async () => {
     if (!selectedService || !selectedDate || !selectedTime) {
       toast.error('Completá todos los campos.');
-      return;
+      return false;
     }
     setSubmitting(true);
     try {
-      toast.error('Creación de cita no disponible: falta conectar el backend.');
+      const id = crypto.randomUUID();
+
+      const referencePhotoPaths = await Promise.all(
+        referenceFiles.map((file, i) => uploadReferencePhoto(file, user.id, id, i))
+      );
+
+      await createAppointment({
+        id,
+        clientId: user.id,
+        serviceId: selectedService.id,
+        serviceName: selectedService.name,
+        servicePrice: selectedService.price,
+        serviceDuration: selectedService.duration,
+        date: selectedDate,
+        time: selectedTime,
+        referencePhotos: referencePhotoPaths,
+      });
+
+      setAppointmentId(id);
+      toast.success('¡Cita creada! Ahora completá el pago.');
+      return true;
+    } catch (err) {
+      if (err.code === '23505') {
+        toast.error('Justo se ocupó ese horario. Elegí otro, por favor.');
+        setSelectedTime(null);
+        const booked = await getBookedSlots(selectedDate);
+        setBookedSlots((prev) => ({ ...prev, [selectedDate]: booked }));
+        setStep(1);
+      } else {
+        toast.error(err.message || 'Error al crear la cita.');
+      }
+      return false;
     } finally {
       setSubmitting(false);
     }
@@ -66,16 +104,13 @@ const BookingPage = () => {
 
   const handleNext = async () => {
     if (step === 2) {
-      await handleCreateAppointment();
+      const created = await handleCreateAppointment();
+      if (!created) return;
     }
     if (step < STEPS.length - 1) setStep(step + 1);
   };
 
-  // Gather all enabled dates from weeks
-  const enabledDays = weeks.flatMap((w) => {
-    const days = getWeekDays(w.weekStart);
-    return days.filter((d) => w.days?.[d.dateStr]?.enabled).map((d) => d.dateStr);
-  });
+  const enabledDays = Object.keys(enabledSchedule);
 
   return (
     <div className="booking-page">
@@ -100,20 +135,27 @@ const BookingPage = () => {
               <h3 className="step-title">Elegí fecha y hora</h3>
               {!selectedService && <p>Seleccioná un servicio primero.</p>}
 
-              <div className="dates-grid">
-                {enabledDays.map((dateStr) => (
-                  <button
-                    key={dateStr}
-                    type="button"
-                    className={`date-btn ${selectedDate === dateStr ? 'selected' : ''}`}
-                    onClick={() => handleDateSelect(dateStr)}
-                  >
-                    {new Date(dateStr + 'T00:00:00').toLocaleDateString('es-CO', {
-                      weekday: 'short', day: 'numeric', month: 'short',
-                    })}
-                  </button>
-                ))}
-              </div>
+              {loadingSchedule ? (
+                <div className="spinner" />
+              ) : (
+                <div className="dates-grid">
+                  {enabledDays.map((dateStr) => (
+                    <button
+                      key={dateStr}
+                      type="button"
+                      className={`date-btn ${selectedDate === dateStr ? 'selected' : ''}`}
+                      onClick={() => handleDateSelect(dateStr)}
+                    >
+                      {new Date(dateStr + 'T00:00:00').toLocaleDateString('es-PE', {
+                        weekday: 'short', day: 'numeric', month: 'short',
+                      })}
+                    </button>
+                  ))}
+                  {enabledDays.length === 0 && (
+                    <p className="no-slots">No hay fechas disponibles todavía.</p>
+                  )}
+                </div>
+              )}
 
               {selectedDate && (
                 <div className="time-slots">
@@ -155,8 +197,23 @@ const BookingPage = () => {
             </div>
           )}
 
-          {step === 3 && appointmentCreated && (
-            <ManualPayment amount={selectedService?.price} />
+          {step === 3 && appointmentId && (
+            <ManualPayment
+              appointmentId={appointmentId}
+              amount={selectedService?.price}
+              adminNotificationMessage={buildAdminNotificationMessage({
+                clientName: profile?.name,
+                clientPhone: profile?.phone,
+                date: selectedDate,
+                time: selectedTime,
+                service: selectedService?.name,
+                price: selectedService?.price,
+              })}
+              onSuccess={() => {
+                toast.success('¡Comprobante enviado! La dueña confirmará tu cita pronto 🎉');
+              }}
+              onDone={() => navigate('/mis-citas')}
+            />
           )}
         </div>
 

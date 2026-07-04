@@ -1,17 +1,23 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Eye, EyeOff, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../utils/constants';
+import { registerClient } from '../api/auth';
+
+const AUTH_ERROR_MESSAGES = {
+  user_already_exists: 'Ese correo ya está registrado.',
+  weak_password: 'La contraseña es muy débil.',
+};
 
 const Register = () => {
   const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // TODO: wire up Supabase auth (supabase.auth.signUp) + insert into a profiles table
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirm) {
@@ -24,7 +30,16 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      toast.error('Registro no disponible: falta conectar el backend.');
+      const { session } = await registerClient(form);
+      if (session) {
+        toast.success('¡Cuenta creada! Ya podés reservar tu cita 💅');
+        navigate('/reservar');
+      } else {
+        toast.success('¡Cuenta creada! Confirmá tu correo para poder iniciar sesión.');
+        navigate('/login');
+      }
+    } catch (err) {
+      toast.error(AUTH_ERROR_MESSAGES[err.code] || err.message || 'Error al registrarse.');
     } finally {
       setLoading(false);
     }
