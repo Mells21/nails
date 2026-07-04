@@ -1,5 +1,5 @@
 import { CANCELLATION_POLICY, SALON_INFO } from './constants';
-import { toReadableDate, to12h } from './dates';
+import { toReadableDate, to12h, formatPrice } from './dates';
 
 /**
  * Build the WhatsApp confirmation message for a new appointment
@@ -40,6 +40,26 @@ Te recordamos que mañana tenés tu cita en ${SALON_INFO.name} 💅
 
 Recordá que esperamos máximo *15 minutos* ⏱️
 ¡Nos vemos! 🌸`;
+};
+
+/**
+ * Build the WhatsApp notification message sent to the salon owner
+ * when a client finishes the booking flow and submits payment proof.
+ */
+export const buildAdminNotificationMessage = ({ clientName, clientPhone, date, time, service, price }) => {
+  const readableDate = toReadableDate(date);
+  const readableTime = to12h(time);
+
+  return `🔔 *Nueva reserva*
+
+👤 *Clienta:* ${clientName}
+📱 *Teléfono:* ${clientPhone}
+💆 *Servicio:* ${service}
+📅 *Fecha:* ${readableDate}
+⏰ *Hora:* ${readableTime}
+💰 *Total:* ${formatPrice(price)}
+
+✅ Comprobante de pago enviado, pendiente de validar.`;
 };
 
 /**
