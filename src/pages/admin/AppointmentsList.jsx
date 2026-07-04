@@ -66,7 +66,7 @@ const AppointmentsList = () => {
           <Link key={apt.id} to={`/admin/citas/${apt.id}`} className="appointment-card hoverable">
             <div className="apt-header">
               <Badge status={apt.status} />
-              <span className="apt-date">{toReadableDate(apt.date)} — {to12h(apt.time)}</span>
+              <span className="apt-date">{toReadableDate(apt.date)} · {to12h(apt.time)}</span>
             </div>
             <div className="apt-body">
               <strong>{apt.clientName}</strong>

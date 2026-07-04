@@ -4,7 +4,7 @@ import { getAllAppointments } from '../../api/appointments';
 import { getAllClients } from '../../api/profiles';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
-import { Calendar, Users, DollarSign, ClipboardList, Scissors } from 'lucide-react';
+import { Calendar, Users, DollarSign, ClipboardList, Scissors, AlertTriangle, Sun } from 'lucide-react';
 
 const Dashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -28,9 +28,9 @@ const Dashboard = () => {
     .reduce((sum, a) => sum + (a.servicePrice || 0), 0);
 
   const stats = [
-    { icon: Calendar, label: 'Citas hoy', value: todayApts.length, color: '#f472b6', link: '/admin/citas' },
+    { icon: Calendar, label: 'Citas hoy', value: todayApts.length, color: '#C9906E', link: '/admin/citas' },
     { icon: ClipboardList, label: 'Por validar', value: pendingValidation.length, color: '#f59e0b', link: '/admin/citas' },
-    { icon: Users, label: 'Clientas totales', value: clients.length, color: '#818cf8', link: '/admin/clientes' },
+    { icon: Users, label: 'Clientas totales', value: clients.length, color: '#5B8B85', link: '/admin/clientes' },
     { icon: DollarSign, label: 'Ingresos del mes', value: formatPrice(monthIncome), color: '#10b981', link: '/admin/citas' },
   ];
 
@@ -39,7 +39,7 @@ const Dashboard = () => {
   return (
     <div className="admin-dashboard">
       <div className="page-header">
-        <h1>¡Buenos días! 💅</h1>
+        <h1><Sun size={26} /> Buenos días</h1>
         <p>Resumen del salón</p>
       </div>
 
@@ -88,13 +88,13 @@ const Dashboard = () => {
       {pendingValidation.length > 0 && (
         <div className="dashboard-section pending-alert">
           <div className="section-header">
-            <h2>⚠️ Comprobantes pendientes de validación</h2>
+            <h2><AlertTriangle size={20} /> Comprobantes pendientes de validación</h2>
           </div>
           <div className="appointments-list">
             {pendingValidation.map((apt) => (
               <Link key={apt.id} to={`/admin/citas/${apt.id}`} className="appointment-card hoverable">
                 <Badge status={apt.status} />
-                <strong>{apt.clientName}</strong> — {apt.serviceName} — {toReadableDate(apt.date)} {to12h(apt.time)}
+                <strong>{apt.clientName}</strong> · {apt.serviceName} · {toReadableDate(apt.date)} {to12h(apt.time)}
               </Link>
             ))}
           </div>

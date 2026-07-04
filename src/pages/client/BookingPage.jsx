@@ -210,7 +210,7 @@ const BookingPage = () => {
                 price: selectedService?.price,
               })}
               onSuccess={() => {
-                toast.success('¡Comprobante enviado! La dueña confirmará tu cita pronto 🎉');
+                toast.success('¡Comprobante enviado! La dueña confirmará tu cita pronto.');
               }}
               onDone={() => navigate('/mis-citas')}
             />

@@ -56,7 +56,7 @@ export const getAllClients = async () => {
 
 /**
  * Nota privada de la dueña sobre una clienta (tabla aparte, nunca visible
- * para la clienta — separada de favoriteColors/allergies).
+ * para la clienta, separada de favoriteColors/allergies).
  */
 export const getClientNote = async (clientId) => {
   const { data, error } = await supabase

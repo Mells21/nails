@@ -21,7 +21,7 @@ const Profile = () => {
     setSaving(true);
     try {
       await updateOwnProfile(user.id, form);
-      toast.success('Perfil actualizado ✅');
+      toast.success('Perfil actualizado');
     } catch (err) {
       toast.error(err.message || 'Error al guardar.');
     } finally {

@@ -60,7 +60,7 @@ const CalendarManager = () => {
     setSaving(true);
     try {
       await saveSchedule(schedule);
-      toast.success('Agenda guardada ✅');
+      toast.success('Agenda guardada');
     } catch (err) {
       toast.error(err.message || 'Error al guardar la agenda.');
     } finally {

@@ -4,7 +4,7 @@ import { uploadPaymentProof } from '../../api/storage';
 import { submitPaymentProof } from '../../api/appointments';
 import { getAdminPhone } from '../../api/profiles';
 import { openWhatsApp } from '../../utils/whatsapp';
-import { Upload, CreditCard, CheckCircle, MessageCircle } from 'lucide-react';
+import { Upload, CreditCard, CheckCircle, MessageCircle, Info } from 'lucide-react';
 import { formatPrice } from '../../utils/dates';
 import { SALON_INFO } from '../../utils/constants';
 import toast from 'react-hot-toast';
@@ -63,7 +63,7 @@ const ManualPayment = ({ appointmentId, amount, adminNotificationMessage, onSucc
       <div className="payment-success">
         <CheckCircle size={48} className="success-icon" />
         <h3>¡Comprobante enviado!</h3>
-        <p>La dueña revisará tu pago y confirmará la cita pronto. 🎉</p>
+        <p>La dueña revisará tu pago y confirmará la cita pronto.</p>
         {adminNotificationMessage && (
           <button
             className="btn btn-whatsapp"
@@ -103,7 +103,7 @@ const ManualPayment = ({ appointmentId, amount, adminNotificationMessage, onSucc
             </div>
           </div>
           <p className="payment-note">
-            💡 Podés consultar los datos bancarios directamente por WhatsApp al salón.
+            <Info size={14} /> Podés consultar los datos bancarios directamente por WhatsApp al salón.
           </p>
         </div>
 
@@ -114,7 +114,7 @@ const ManualPayment = ({ appointmentId, amount, adminNotificationMessage, onSucc
             <label className="upload-area" htmlFor="proof-upload">
               <Upload size={32} />
               <span>Hacé clic para subir la captura de pantalla</span>
-              <span className="upload-hint">PNG, JPG — Máx. 10MB</span>
+              <span className="upload-hint">PNG, JPG, máx. 10MB</span>
               <input
                 id="proof-upload"
                 type="file"
