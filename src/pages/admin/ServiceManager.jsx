@@ -110,7 +110,7 @@ const ServiceManager = () => {
         await uploadServiceImage(imageFile, service.id);
       }
 
-      toast.success(editingId ? 'Servicio actualizado ✅' : 'Servicio creado ✅');
+      toast.success(editingId ? 'Servicio actualizado' : 'Servicio creado');
       setModalOpen(false);
       load();
     } catch (err) {
