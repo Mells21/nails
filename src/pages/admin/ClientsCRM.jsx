@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { getAllClients, getClientNote, upsertClientNote } from '../../api/profiles';
+import { getClientAppointments } from '../../api/appointments';
 import { openWhatsApp } from '../../utils/whatsapp';
 import { formatPrice, toReadableDate } from '../../utils/dates';
 import Badge from '../../components/ui/Badge';
@@ -6,16 +8,22 @@ import Modal from '../../components/ui/Modal';
 import { Search, MessageCircle, ChevronRight, Save, Heart, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// TODO: fetch/update clients and appointment history via Supabase
 const ClientsCRM = () => {
-  const [clients] = useState([]);
+  const [clients, setClients] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
   const [clientHistory, setClientHistory] = useState([]);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getAllClients().then((data) => {
+      setClients(data);
+      setFiltered(data);
+    }).finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (!search) { setFiltered(clients); return; }
@@ -25,16 +33,25 @@ const ClientsCRM = () => {
     ));
   }, [search, clients]);
 
-  const openClient = (client) => {
+  const openClient = async (client) => {
     setSelectedClient(client);
-    setNotes(client.notes || '');
+    setNotes('');
     setClientHistory([]);
+    const [note, history] = await Promise.all([
+      getClientNote(client.id).catch(() => ''),
+      getClientAppointments(client.id).catch(() => []),
+    ]);
+    setNotes(note);
+    setClientHistory(history);
   };
 
   const saveNotes = async () => {
     setSaving(true);
     try {
-      toast.error('Guardado no disponible: falta conectar el backend.');
+      await upsertClientNote(selectedClient.id, notes);
+      toast.success('Notas guardadas ✅');
+    } catch (err) {
+      toast.error(err.message || 'Error al guardar.');
     } finally { setSaving(false); }
   };
 
@@ -61,7 +78,7 @@ const ClientsCRM = () => {
 
       <div className="clients-list">
         {filtered.map((client) => (
-          <div key={client.uid} className="client-card">
+          <div key={client.id} className="client-card">
             <div className="client-avatar">
               {client.name?.[0]?.toUpperCase()}
             </div>
