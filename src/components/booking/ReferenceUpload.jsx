@@ -36,7 +36,7 @@ const ReferenceUpload = ({ files, onChange }) => {
         <label className="upload-area" htmlFor="ref-upload">
           <Upload size={32} />
           <span>Hacé clic o arrastrá tus fotos aquí</span>
-          <span className="upload-hint">PNG, JPG, WEBP — Máx. {MAX_SIZE_MB}MB c/u</span>
+          <span className="upload-hint">PNG, JPG, WEBP, máx. {MAX_SIZE_MB}MB c/u</span>
           <input
             id="ref-upload"
             type="file"
