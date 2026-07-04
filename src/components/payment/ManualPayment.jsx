@@ -7,7 +7,7 @@ import { openWhatsApp } from '../../utils/whatsapp';
 import { Upload, CreditCard, CheckCircle, MessageCircle, Info } from 'lucide-react';
 import { formatPrice } from '../../utils/dates';
 import { SALON_INFO } from '../../utils/constants';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
 
 const MAX_SIZE_MB = 10;
 
