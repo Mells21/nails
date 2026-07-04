@@ -70,7 +70,7 @@ export const createAppointment = async ({
 /**
  * Horarios ya ocupados (bloqueantes) para una fecha puntual.
  * Usa una RPC porque el RLS de appointments solo deja ver las citas
- * propias — esta función expone solo el horario, no el resto de datos.
+ * propias, esta función expone solo el horario, no el resto de datos.
  */
 export const getBookedSlots = async (date) => {
   const { data, error } = await supabase.rpc('get_booked_slots', { p_date: date });
