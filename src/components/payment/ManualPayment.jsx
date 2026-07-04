@@ -1,18 +1,41 @@
-import { useState } from 'react';
-import { Upload, CreditCard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { uploadPaymentProof } from '../../api/storage';
+import { submitPaymentProof } from '../../api/appointments';
+import { getAdminPhone } from '../../api/profiles';
+import { openWhatsApp } from '../../utils/whatsapp';
+import { Upload, CreditCard, CheckCircle, MessageCircle } from 'lucide-react';
 import { formatPrice } from '../../utils/dates';
 import { SALON_INFO } from '../../utils/constants';
 import toast from 'react-hot-toast';
 
-// TODO: upload payment proof + submit via Supabase
-const ManualPayment = ({ amount }) => {
+const MAX_SIZE_MB = 10;
+
+const ManualPayment = ({ appointmentId, amount, adminNotificationMessage, onSuccess, onDone }) => {
+  const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [adminPhone, setAdminPhone] = useState(null);
+
+  useEffect(() => {
+    getAdminPhone().then(setAdminPhone).catch(() => setAdminPhone(null));
+  }, []);
+
+  const contactPhone = adminPhone || SALON_INFO.whatsapp;
 
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
+    if (!f.type.startsWith('image/')) {
+      toast.error(`${f.name} no es una imagen.`);
+      return;
+    }
+    if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast.error(`${f.name} supera ${MAX_SIZE_MB}MB.`);
+      return;
+    }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -24,11 +47,40 @@ const ManualPayment = ({ amount }) => {
     }
     setUploading(true);
     try {
-      toast.error('Envío no disponible: falta conectar el backend.');
+      const path = await uploadPaymentProof(file, user.id, appointmentId);
+      await submitPaymentProof(appointmentId, path);
+      setDone(true);
+      onSuccess?.();
+    } catch (err) {
+      toast.error(err.message || 'Error al subir el comprobante.');
     } finally {
       setUploading(false);
     }
   };
+
+  if (done) {
+    return (
+      <div className="payment-success">
+        <CheckCircle size={48} className="success-icon" />
+        <h3>¡Comprobante enviado!</h3>
+        <p>La dueña revisará tu pago y confirmará la cita pronto. 🎉</p>
+        {adminNotificationMessage && (
+          <button
+            className="btn btn-whatsapp"
+            onClick={() => {
+              openWhatsApp(contactPhone, adminNotificationMessage);
+              onDone?.();
+            }}
+          >
+            <MessageCircle size={18} /> Avisarle a la dueña por WhatsApp
+          </button>
+        )}
+        <button className="btn btn-ghost btn-sm" onClick={() => onDone?.()}>
+          Ir a mis citas
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="manual-payment">
@@ -47,7 +99,7 @@ const ManualPayment = ({ amount }) => {
             </div>
             <div className="payment-detail-row">
               <span>WhatsApp del salón</span>
-              <strong>{SALON_INFO.whatsapp}</strong>
+              <strong>{contactPhone}</strong>
             </div>
           </div>
           <p className="payment-note">
