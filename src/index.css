@@ -356,9 +356,16 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
   line-height: 1.15;
   margin-bottom: 20px;
   color: var(--aura-text);
+  min-height: 3.5em;
 }
 .gradient-text {
   color: var(--aura-terracotta);
+  background: linear-gradient(90deg, var(--aura-terracotta) 0%, var(--aura-gold) 45%, var(--aura-terracotta) 90%);
+  background-size: 250% 100%;
+  background-position: 0% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .hero-subtitle { font-size: 17px; color: var(--aura-text-soft); max-width: 480px; margin-bottom: 32px; }
 .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
