@@ -5,7 +5,7 @@ import { openWhatsApp } from '../../utils/whatsapp';
 import { formatPrice, toReadableDate } from '../../utils/dates';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
-import { Search, MessageCircle, ChevronRight, Save, Heart, AlertTriangle } from 'lucide-react';
+import { Search, MessageCircle, ChevronRight, Save, Heart, AlertTriangle, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const ClientsCRM = () => {
@@ -49,7 +49,7 @@ const ClientsCRM = () => {
     setSaving(true);
     try {
       await upsertClientNote(selectedClient.id, notes);
-      toast.success('Notas guardadas ✅');
+      toast.success('Notas guardadas');
     } catch (err) {
       toast.error(err.message || 'Error al guardar.');
     } finally { setSaving(false); }
@@ -116,8 +116,8 @@ const ClientsCRM = () => {
         {selectedClient && (
           <div className="client-detail">
             <div className="client-meta">
-              <p>📱 {selectedClient.phone}</p>
-              <p>✉️ {selectedClient.email}</p>
+              <p><Phone size={14} /> {selectedClient.phone}</p>
+              <p><Mail size={14} /> {selectedClient.email}</p>
               {selectedClient.favoriteColors && <p><Heart size={14} /> {selectedClient.favoriteColors}</p>}
               {selectedClient.allergies && <p><AlertTriangle size={14} /> Alergias: {selectedClient.allergies}</p>}
             </div>
