@@ -1,13 +1,18 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { logout } from '../../api/auth';
-import { LogOut, Calendar, User, LayoutDashboard } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { LogOut, Calendar, User, LayoutDashboard, ClipboardList, Menu, X } from 'lucide-react';
+import { toast } from '../../utils/toast';
 import { SALON_INFO } from '../../utils/constants';
 
 const Navbar = () => {
   const { user, isAdmin, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -19,12 +24,20 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" className="brand-link">
-          <img src="/images/marca.jpg" alt="" className="brand-icon" />
+          <img src="/images/marca.webp" alt="" className="brand-icon" />
           <span>{SALON_INFO.name}</span>
         </Link>
       </div>
 
-      <div className="navbar-menu">
+      <button
+        className="navbar-toggle"
+        onClick={() => setMenuOpen((open) => !open)}
+        aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+      >
+        {menuOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
+      <div className={`navbar-menu ${menuOpen ? 'open' : ''}`}>
         {!user && (
           <>
             <Link to="/" className="nav-link">Inicio</Link>
@@ -56,7 +69,7 @@ const Navbar = () => {
               <Calendar size={16} /> Reservar
             </Link>
             <Link to="/mis-citas" className="nav-link">
-              Mis citas
+              <ClipboardList size={16} /> Mis citas
             </Link>
             <Link to="/perfil" className="nav-link">
               <User size={16} /> {profile?.name?.split(' ')[0] || 'Perfil'}
