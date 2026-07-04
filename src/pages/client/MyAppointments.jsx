@@ -1,23 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getClientAppointments } from '../../firebase/appointments';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { Calendar, Clock, Scissors, MessageCircle } from 'lucide-react';
 import { buildConfirmationMessage, openWhatsApp } from '../../utils/whatsapp';
 import { SALON_INFO } from '../../utils/constants';
 
+// TODO: fetch client appointments from Supabase
 const MyAppointments = () => {
-  const { user, profile } = useAuth();
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    getClientAppointments(user.uid)
-      .then(setAppointments)
-      .finally(() => setLoading(false));
-  }, [user]);
+  const { profile } = useAuth();
+  const [appointments] = useState([]);
+  const [loading] = useState(false);
 
   const handleWhatsApp = (apt) => {
     const msg = buildConfirmationMessage({

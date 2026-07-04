@@ -1,17 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { logout } from '../../firebase/auth';
 import { Sparkles, LogOut, Calendar, User, LayoutDashboard } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { SALON_INFO } from '../../utils/constants';
 
 const Navbar = () => {
   const { user, isAdmin, profile } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-    toast.success('Sesión cerrada');
+  // TODO: wire up Supabase auth (supabase.auth.signOut)
+  const handleLogout = () => {
     navigate('/');
   };
 

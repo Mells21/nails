@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../firebase/auth';
+import { Link } from 'react-router-dom';
 import { Sparkles, Eye, EyeOff, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../utils/constants';
@@ -10,22 +9,13 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
+  // TODO: wire up Supabase auth (supabase.auth.signInWithPassword)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password);
-      toast.success('¡Bienvenida!');
-      navigate('/reservar');
-    } catch (err) {
-      const msgs = {
-        'auth/user-not-found': 'No existe una cuenta con ese correo.',
-        'auth/wrong-password': 'Contraseña incorrecta.',
-        'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-      };
-      toast.error(msgs[err.code] || 'Error al iniciar sesión.');
+      toast.error('Login no disponible: falta conectar el backend.');
     } finally {
       setLoading(false);
     }

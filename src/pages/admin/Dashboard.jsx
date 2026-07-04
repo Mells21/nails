@@ -1,24 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllAppointments } from '../../firebase/appointments';
-import { getAllClients } from '../../firebase/clients';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { Calendar, Users, DollarSign, ClipboardList, Scissors } from 'lucide-react';
 
+// TODO: fetch appointments/clients from Supabase
 const Dashboard = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([getAllAppointments(), getAllClients()])
-      .then(([apts, cls]) => {
-        setAppointments(apts);
-        setClients(cls);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const [appointments] = useState([]);
+  const [clients] = useState([]);
+  const [loading] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
   const todayApts = appointments.filter((a) => a.date === today);
