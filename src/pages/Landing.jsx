@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { TextPlugin } from 'gsap/TextPlugin';
 import { Calendar, Shield, Heart, Clock, ClipboardList, Timer, Wallet, MessageCircle } from 'lucide-react';
 import { SALON_INFO } from '../utils/constants';
 import { getActiveServices } from '../api/services';
 import { getServiceIcon } from '../utils/serviceIcon';
 import { formatPrice, formatDuration } from '../utils/dates';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 const GALLERY = [
   { src: '/images/img13.jpg', tall: true },
@@ -25,6 +26,9 @@ const GALLERY = [
 const Landing = () => {
   const [services, setServices] = useState([]);
   const rootRef = useRef(null);
+  const titleLine1Ref = useRef(null);
+  const gradientRef = useRef(null);
+  const titleLine2Ref = useRef(null);
 
   useEffect(() => {
     getActiveServices().then(setServices);
@@ -32,19 +36,58 @@ const Landing = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('.hero-content > *', {
-        opacity: 0,
-        y: 24,
-        duration: 0.7,
-        stagger: 0.12,
-        ease: 'power2.out',
+      const tl = gsap.timeline();
+      const textTargets = [titleLine1Ref.current, gradientRef.current, titleLine2Ref.current];
+
+      tl.set(textTargets, { text: '' })
+        .from('.hero-badge, .hero-title, .hero-subtitle, .hero-cta', {
+          opacity: 0,
+          y: 24,
+          duration: 0.7,
+          stagger: 0.12,
+          ease: 'power2.out',
+        })
+        .from('.hero-visual img', {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.9,
+          ease: 'power2.out',
+        }, '<')
+        // El título se escribe solo, palabra por palabra
+        .to(titleLine1Ref.current, { duration: 0.5, text: 'Uñas que', ease: 'none' }, '-=0.2')
+        .to(gradientRef.current, { duration: 0.5, text: ' brillan', ease: 'none' })
+        .to(titleLine2Ref.current, { duration: 0.6, text: ' tanto como vos', ease: 'none' })
+        // y una vez escrito, "brillan" queda con un brillo en loop
+        .to('.gradient-text', {
+          backgroundPosition: '200% 0%',
+          duration: 2.5,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+        });
+
+      // Parallax bien marcado: las fotos del hero suben harto al bajar
+      // el scroll y vuelven a bajar si se sube (scrub las liga directo
+      // a la posición del scroll)
+      gsap.to('.hero-photo-main', {
+        y: -280,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.5,
+        },
       });
-      gsap.from('.hero-visual img', {
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.9,
-        delay: 0.2,
-        ease: 'power2.out',
+      gsap.to('.hero-photo-accent', {
+        y: -140,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.5,
+        },
       });
 
       gsap.utils.toArray('.features, .gallery-section, .services-section, .policy-section').forEach((section) => {
@@ -88,9 +131,9 @@ const Landing = () => {
             <span>Estudio de uñas en Rioja</span>
           </div>
           <h1 className="hero-title">
-            Uñas que
-            <span className="gradient-text"> brillan</span>
-            {' '}tanto como vos
+            <span ref={titleLine1Ref}>Uñas que</span>
+            <span className="gradient-text" ref={gradientRef}> brillan</span>
+            <span ref={titleLine2Ref}> tanto como vos</span>
           </h1>
           <p className="hero-subtitle">
             Reservá tu turno online, elegí tu diseño y dejanos hacer la magia.
