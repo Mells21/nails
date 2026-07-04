@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { getWeekSchedule, saveWeekSchedule } from '../../firebase/schedule';
+import { useState } from 'react';
 import { getMondayOf, toDateStr, getWeekDays } from '../../utils/dates';
 import { addWeeks, subWeeks } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus, Trash2, Save } from 'lucide-react';
@@ -7,6 +6,7 @@ import toast from 'react-hot-toast';
 
 const DEFAULT_DAY = { enabled: false, start: '09:00', end: '18:00', breaks: [] };
 
+// TODO: fetch/save week schedule via Supabase
 const CalendarManager = () => {
   const [currentMonday, setCurrentMonday] = useState(getMondayOf(new Date()));
   const [schedule, setSchedule] = useState({});
@@ -14,12 +14,6 @@ const CalendarManager = () => {
 
   const mondayStr = toDateStr(currentMonday);
   const weekDays = getWeekDays(mondayStr);
-
-  useEffect(() => {
-    getWeekSchedule(mondayStr).then((data) => {
-      setSchedule(data?.days || {});
-    });
-  }, [mondayStr]);
 
   const toggleDay = (dateStr) => {
     setSchedule((prev) => ({
@@ -56,10 +50,7 @@ const CalendarManager = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveWeekSchedule(mondayStr, schedule);
-      toast.success('Agenda guardada ✅');
-    } catch {
-      toast.error('Error al guardar la agenda.');
+      toast.error('Guardado no disponible: falta conectar el backend.');
     } finally {
       setSaving(false);
     }
