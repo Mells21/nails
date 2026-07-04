@@ -63,7 +63,7 @@ const MyAppointments = () => {
 
       {appointments.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-emoji">📅</span>
+          <Calendar size={48} className="empty-emoji" />
           <h3>No tenés citas todavía</h3>
           <p>¡Reservá tu primer turno!</p>
           <a href="/reservar" className="btn btn-primary">Reservar ahora</a>
