@@ -10,7 +10,7 @@ import { getSignedUrl } from '../../api/storage';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { buildConfirmationMessage, buildReminderMessage, openWhatsApp } from '../../utils/whatsapp';
-import { MessageCircle, ArrowLeft, Check, X, AlertTriangle, Image } from 'lucide-react';
+import { MessageCircle, ArrowLeft, Check, X, AlertTriangle, Image, User, Phone, Mail, Scissors, Calendar, Clock, DollarSign, Receipt } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AppointmentDetail = () => {
@@ -44,7 +44,7 @@ const AppointmentDetail = () => {
     setActing(true);
     try {
       await confirmManualPayment(id);
-      toast.success('Cita confirmada ✅');
+      toast.success('Cita confirmada');
       reload();
     } catch (err) {
       toast.error(err.message || 'Error al confirmar.');
@@ -121,18 +121,18 @@ const AppointmentDetail = () => {
 
       <div className="detail-grid">
         <div className="detail-card">
-          <h3>👤 Clienta</h3>
+          <h3><User size={18} /> Clienta</h3>
           <p><strong>{apt.clientName}</strong></p>
-          <p>📱 {apt.clientPhone}</p>
-          <p>✉️ {apt.clientEmail}</p>
+          <p><Phone size={14} /> {apt.clientPhone}</p>
+          <p><Mail size={14} /> {apt.clientEmail}</p>
         </div>
 
         <div className="detail-card">
-          <h3>💅 Servicio</h3>
+          <h3><Scissors size={18} /> Servicio</h3>
           <p><strong>{apt.serviceName}</strong></p>
-          <p>📅 {toReadableDate(apt.date)}</p>
-          <p>⏰ {to12h(apt.time)}</p>
-          <p>💰 {formatPrice(apt.servicePrice)}</p>
+          <p><Calendar size={14} /> {toReadableDate(apt.date)}</p>
+          <p><Clock size={14} /> {to12h(apt.time)}</p>
+          <p><DollarSign size={14} /> {formatPrice(apt.servicePrice)}</p>
         </div>
 
         {/* Reference photos */}
@@ -152,7 +152,7 @@ const AppointmentDetail = () => {
         {/* Payment proof */}
         {paymentProofSignedUrl && (
           <div className="detail-card full-width">
-            <h3>🧾 Comprobante de pago</h3>
+            <h3><Receipt size={18} /> Comprobante de pago</h3>
             <a href={paymentProofSignedUrl} target="_blank" rel="noreferrer">
               <img src={paymentProofSignedUrl} alt="Comprobante" className="proof-thumb" />
             </a>
