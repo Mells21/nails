@@ -1,10 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getAvailableWeeks, getAvailableSlots } from '../../firebase/schedule';
-import { getAppointmentsByDateRange } from '../../firebase/appointments';
-import { createAppointment } from '../../firebase/appointments';
-import { uploadReferencePhoto } from '../../firebase/storage';
+import { getAvailableSlots } from '../../utils/slots';
 import ServiceSelector from '../../components/booking/ServiceSelector';
 import ReferenceUpload from '../../components/booking/ReferenceUpload';
 import BookingSummary from '../../components/booking/BookingSummary';
@@ -15,40 +11,27 @@ import toast from 'react-hot-toast';
 
 const STEPS = ['Servicio', 'Fecha y hora', 'Fotos', 'Pago'];
 
+// TODO: fetch available weeks/booked slots and create appointment via Supabase
 const BookingPage = () => {
-  const { user, profile } = useAuth();
-  const navigate = useNavigate();
+  const { profile } = useAuth();
 
   const [step, setStep] = useState(0);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [referenceFiles, setReferenceFiles] = useState([]);
-  const [weeks, setWeeks] = useState([]);
+  const [weeks] = useState([]);
   const [bookedSlots, setBookedSlots] = useState({});
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [appointmentId, setAppointmentId] = useState(null);
+  const [appointmentCreated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    getAvailableWeeks().then(setWeeks);
-  }, []);
-
-  const handleDateSelect = async (dateStr) => {
+  const handleDateSelect = (dateStr) => {
     setSelectedDate(dateStr);
     setSelectedTime(null);
     setLoadingSlots(true);
-    try {
-      const start = dateStr;
-      const end = dateStr;
-      const booked = await getAppointmentsByDateRange(start, end);
-      const slots = booked
-        .filter((a) => ['confirmed', 'pending_payment', 'pending_validation'].includes(a.status))
-        .map((a) => ({ time: a.time }));
-      setBookedSlots((prev) => ({ ...prev, [dateStr]: slots }));
-    } finally {
-      setLoadingSlots(false);
-    }
+    setBookedSlots((prev) => ({ ...prev, [dateStr]: [] }));
+    setLoadingSlots(false);
   };
 
   const getAvailableSlotsForDate = (dateStr) => {
@@ -69,33 +52,7 @@ const BookingPage = () => {
     }
     setSubmitting(true);
     try {
-      const id = await createAppointment({
-        clientUid: user.uid,
-        clientName: profile.name,
-        clientPhone: profile.phone,
-        clientEmail: profile.email,
-        serviceId: selectedService.id,
-        serviceName: selectedService.name,
-        servicePrice: selectedService.price,
-        serviceDuration: selectedService.duration,
-        date: selectedDate,
-        time: selectedTime,
-        referencePhotos: [],
-      });
-
-      // Upload reference photos
-      if (referenceFiles.length > 0) {
-        const urls = await Promise.all(
-          referenceFiles.map((f, i) => uploadReferencePhoto(f, id, i))
-        );
-        // Update with photo URLs (done via ManualPayment or after payment)
-      }
-
-      setAppointmentId(id);
-      toast.success('¡Cita creada! Ahora completá el pago.');
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al crear la cita.');
+      toast.error('Creación de cita no disponible: falta conectar el backend.');
     } finally {
       setSubmitting(false);
     }
@@ -198,15 +155,8 @@ const BookingPage = () => {
             </div>
           )}
 
-          {step === 3 && appointmentId && (
-            <ManualPayment
-              appointmentId={appointmentId}
-              amount={selectedService?.price}
-              onSuccess={() => {
-                toast.success('¡Comprobante enviado! La dueña confirmará tu cita pronto 🎉');
-                navigate('/mis-citas');
-              }}
-            />
+          {step === 3 && appointmentCreated && (
+            <ManualPayment amount={selectedService?.price} />
           )}
         </div>
 
