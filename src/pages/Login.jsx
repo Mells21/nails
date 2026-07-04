@@ -1,21 +1,31 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Eye, EyeOff, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../utils/constants';
+import { login } from '../api/auth';
+
+const AUTH_ERROR_MESSAGES = {
+  invalid_credentials: 'Correo o contraseña incorrectos.',
+  email_not_confirmed: 'Confirmá tu correo antes de iniciar sesión (revisá tu bandeja de entrada).',
+};
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // TODO: wire up Supabase auth (supabase.auth.signInWithPassword)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      toast.error('Login no disponible: falta conectar el backend.');
+      await login(email, password);
+      toast.success('¡Bienvenida!');
+      navigate('/reservar');
+    } catch (err) {
+      toast.error(AUTH_ERROR_MESSAGES[err.code] || err.message || 'Error al iniciar sesión.');
     } finally {
       setLoading(false);
     }
