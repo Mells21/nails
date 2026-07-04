@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../utils/constants';
 import { login } from '../api/auth';
@@ -35,8 +35,7 @@ const Login = () => {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <Sparkles size={32} />
-          <h1>{SALON_INFO.name}</h1>
+          <img src="/images/marca.jpg" alt={SALON_INFO.name} />
         </div>
         <h2 className="auth-title">Iniciar sesión</h2>
         <p className="auth-subtitle">Accedé a tu cuenta para gestionar tus citas</p>
