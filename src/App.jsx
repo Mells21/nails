@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import Navbar from './components/layout/Navbar';
@@ -110,18 +109,6 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: '#1e1b2e',
-              color: '#f8f4ff',
-              border: '1px solid #3d3560',
-              borderRadius: '12px',
-              fontFamily: 'Inter, sans-serif',
-            },
-          }}
-        />
       </AuthProvider>
     </BrowserRouter>
   );
