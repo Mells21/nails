@@ -1,6 +1,6 @@
 /**
  * Get available time slots for a specific date, excluding booked slots.
- * Pure function — no backend dependency.
+ * Pure function, no backend dependency.
  * @param {Object} dayConfig - { enabled, start, end, breaks: [{ breakStart, breakEnd }] }
  * @param {number} serviceDurationMinutes
  * @param {Array} bookedSlots - array of { time: "HH:mm" } objects already booked
