@@ -7,7 +7,6 @@ import {
   Users,
   Settings,
   LogOut,
-  Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../../utils/constants';
@@ -32,7 +31,7 @@ const AdminSidebar = () => {
   return (
     <aside className="admin-sidebar">
       <div className="sidebar-brand">
-        <Sparkles size={24} />
+        <img src="/images/marca.jpg" alt="" className="sidebar-brand-icon" />
         <div>
           <span className="sidebar-brand-name">{SALON_INFO.name}</span>
           <span className="sidebar-brand-role">Panel Admin</span>
