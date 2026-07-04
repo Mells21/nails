@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { getAllClients, updateClientProfile } from '../../firebase/clients';
-import { getClientAppointments } from '../../firebase/appointments';
 import { openWhatsApp } from '../../utils/whatsapp';
 import { formatPrice, toReadableDate } from '../../utils/dates';
 import Badge from '../../components/ui/Badge';
@@ -8,22 +6,16 @@ import Modal from '../../components/ui/Modal';
 import { Search, MessageCircle, ChevronRight, Save, Heart, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// TODO: fetch/update clients and appointment history via Supabase
 const ClientsCRM = () => {
-  const [clients, setClients] = useState([]);
+  const [clients] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [clientHistory, setClientHistory] = useState([]);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    getAllClients().then((data) => {
-      setClients(data);
-      setFiltered(data);
-    }).finally(() => setLoading(false));
-  }, []);
 
   useEffect(() => {
     if (!search) { setFiltered(clients); return; }
@@ -33,23 +25,16 @@ const ClientsCRM = () => {
     ));
   }, [search, clients]);
 
-  const openClient = async (client) => {
+  const openClient = (client) => {
     setSelectedClient(client);
     setNotes(client.notes || '');
-    const history = await getClientAppointments(client.uid);
-    setClientHistory(history);
+    setClientHistory([]);
   };
 
   const saveNotes = async () => {
     setSaving(true);
     try {
-      await updateClientProfile(selectedClient.uid, {
-        notes,
-        favoriteColors: selectedClient.favoriteColors,
-        allergies: selectedClient.allergies,
-      });
-      toast.success('Notas guardadas ✅');
-      setClients((prev) => prev.map((c) => c.uid === selectedClient.uid ? { ...c, notes } : c));
+      toast.error('Guardado no disponible: falta conectar el backend.');
     } finally { setSaving(false); }
   };
 
