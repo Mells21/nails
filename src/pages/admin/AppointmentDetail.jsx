@@ -1,38 +1,31 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getAppointment, updateAppointmentStatus, confirmManualPayment, cancelAppointment } from '../../firebase/appointments';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { buildConfirmationMessage, buildReminderMessage, openWhatsApp } from '../../utils/whatsapp';
 import { MessageCircle, ArrowLeft, Check, X, AlertTriangle, Image } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// TODO: fetch/update appointment via Supabase
 const AppointmentDetail = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [apt, setApt] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [apt] = useState(null);
+  const [loading] = useState(false);
   const [acting, setActing] = useState(false);
 
-  const reload = () => getAppointment(id).then(setApt).finally(() => setLoading(false));
-
-  useEffect(() => { reload(); }, [id]);
+  const notAvailable = () => toast.error('Función no disponible: falta conectar el backend.');
 
   const handleConfirm = async () => {
     setActing(true);
     try {
-      await confirmManualPayment(id);
-      toast.success('Cita confirmada ✅');
-      reload();
+      notAvailable();
     } finally { setActing(false); }
   };
 
   const handleComplete = async () => {
     setActing(true);
     try {
-      await updateAppointmentStatus(id, 'completed');
-      toast.success('Cita marcada como completada');
-      reload();
+      notAvailable();
     } finally { setActing(false); }
   };
 
@@ -40,18 +33,14 @@ const AppointmentDetail = () => {
     if (!confirm('¿Segura que querés cancelar esta cita?')) return;
     setActing(true);
     try {
-      await cancelAppointment(id);
-      toast.success('Cita cancelada');
-      reload();
+      notAvailable();
     } finally { setActing(false); }
   };
 
   const handleNoShow = async () => {
     setActing(true);
     try {
-      await updateAppointmentStatus(id, 'no_show');
-      toast.success('Registrado como inasistencia');
-      reload();
+      notAvailable();
     } finally { setActing(false); }
   };
 
