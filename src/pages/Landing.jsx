@@ -1,9 +1,18 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Calendar, Shield, Heart, Clock, Star } from 'lucide-react';
-import { SALON_INFO, SERVICES } from '../utils/constants';
+import { Sparkles, Calendar, Shield, Heart, Clock } from 'lucide-react';
+import { SALON_INFO } from '../utils/constants';
+import { getActiveServices } from '../api/services';
+import { getServiceIcon } from '../utils/serviceIcon';
 import { formatPrice, formatDuration } from '../utils/dates';
 
 const Landing = () => {
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    getActiveServices().then(setServices);
+  }, []);
+
   return (
     <div className="landing">
       {/* Hero */}
@@ -68,19 +77,26 @@ const Landing = () => {
           <p>Precios y duración estimada. Los diseños se definen en persona o con tus fotos de referencia.</p>
         </div>
         <div className="services-grid">
-          {SERVICES.map((service) => (
-            <div key={service.id} className="service-card">
-              <div className="service-emoji">{service.emoji}</div>
-              <div className="service-info">
-                <h3>{service.name}</h3>
-                <p>{service.description}</p>
-                <div className="service-meta">
-                  <span className="service-duration"><Clock size={14} /> {formatDuration(service.duration)}</span>
-                  <span className="service-price">{formatPrice(service.price)}</span>
+          {services.map((service) => {
+            const Icon = getServiceIcon(service.name);
+            return (
+              <div key={service.id} className="service-card">
+                {service.imageUrl ? (
+                  <img src={service.imageUrl} alt="" className="service-card-thumb" />
+                ) : (
+                  <div className="service-emoji"><Icon size={24} /></div>
+                )}
+                <div className="service-info">
+                  <h3>{service.name}</h3>
+                  <p>{service.description}</p>
+                  <div className="service-meta">
+                    <span className="service-duration"><Clock size={14} /> {formatDuration(service.duration)}</span>
+                    <span className="service-price">{formatPrice(service.price)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="services-cta">
           <Link to="/registro" className="btn btn-primary btn-lg">Quiero reservar ahora</Link>
