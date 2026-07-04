@@ -10,8 +10,10 @@ import {
 import { getServiceIcon } from '../../utils/serviceIcon';
 import { formatPrice, formatDuration } from '../../utils/dates';
 import Modal from '../../components/ui/Modal';
+import { ServiceAdminCardSkeleton } from '../../components/ui/CardSkeletons';
 import { Clock, DollarSign, Plus, Pencil, Trash2, EyeOff, Eye, Upload, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
+import { confirmAction } from '../../utils/confirmToast';
 
 const EMPTY_FORM = { name: '', description: '', duration: 60, price: 0, color: '#f472b6' };
 const MAX_SIZE_MB = 5;
@@ -93,6 +95,10 @@ const ServiceManager = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!imageFile && !existingImageUrl) {
+      toast.error('Subí una imagen del servicio antes de guardar.');
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -130,18 +136,22 @@ const ServiceManager = () => {
     }
   };
 
-  const handleDelete = async (service) => {
-    if (!confirm(`¿Eliminar "${service.name}" definitivamente?`)) return;
-    try {
-      await deleteService(service.id);
-      toast.success('Servicio eliminado');
-      load();
-    } catch (err) {
-      toast.error(err.message || 'Error al eliminar.');
-    }
+  const handleDelete = (service) => {
+    confirmAction({
+      title: `¿Eliminar "${service.name}"?`,
+      description: 'Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      onConfirm: async () => {
+        try {
+          await deleteService(service.id);
+          toast.success('Servicio eliminado');
+          load();
+        } catch (err) {
+          toast.error(err.message || 'Error al eliminar.');
+        }
+      },
+    });
   };
-
-  if (loading) return <div className="page-loading"><div className="spinner" /></div>;
 
   return (
     <div className="admin-page">
@@ -150,45 +160,52 @@ const ServiceManager = () => {
           <h1>Servicios</h1>
           <p>Menú de servicios del salón</p>
         </div>
-        <button className="btn btn-primary" onClick={openCreate}>
+        <button className="btn btn-primary" onClick={openCreate} disabled={loading}>
           <Plus size={18} /> Nuevo servicio
         </button>
       </div>
 
       <div className="services-admin-grid">
-        {services.map((service) => {
+        {loading && Array.from({ length: 4 }).map((_, i) => <ServiceAdminCardSkeleton key={i} />)}
+        {!loading && services.map((service) => {
           const Icon = getServiceIcon(service.name);
           return (
             <div key={service.id} className={`service-admin-card ${!service.active ? 'service-inactive' : ''}`}>
-              <div className="service-admin-header">
+              <div className="service-admin-media">
                 {service.imageUrl ? (
-                  <img src={service.imageUrl} alt="" className="service-admin-thumb" />
+                  <img src={service.imageUrl} alt="" />
                 ) : (
-                  <div className="service-admin-icon"><Icon size={20} /></div>
+                  <div className="service-admin-media-empty">
+                    <Icon size={28} />
+                    <span>Sin imagen</span>
+                  </div>
                 )}
+                {!service.active && <span className="service-admin-badge">Inactivo</span>}
+              </div>
+              <div className="service-admin-body">
                 <h3>{service.name}</h3>
-              </div>
-              <p className="service-admin-desc">{service.description}</p>
-              <div className="service-admin-meta">
-                <span><Clock size={14} /> {formatDuration(service.duration)}</span>
-                <span><DollarSign size={14} /> {formatPrice(service.price)}</span>
-              </div>
-              <div className="service-admin-actions">
-                <button className="btn btn-outline btn-sm" onClick={() => openEdit(service)}>
-                  <Pencil size={14} /> Editar
-                </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(service)}>
-                  {service.active ? <EyeOff size={14} /> : <Eye size={14} />}
-                  {service.active ? 'Desactivar' : 'Activar'}
-                </button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(service)}>
-                  <Trash2 size={14} />
-                </button>
+                <p className="service-admin-desc">{service.description}</p>
+                <div className="service-admin-meta">
+                  <span><Clock size={14} /> {formatDuration(service.duration)}</span>
+                  <span><DollarSign size={14} /> {formatPrice(service.price)}</span>
+                </div>
+                <div className="service-admin-actions">
+                  <button className="btn btn-outline btn-sm" onClick={() => openEdit(service)}>
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(service)}>
+                    {service.active ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {service.active ? 'Desactivar' : 'Activar'}
+                  </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(service)}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           );
         })}
-        {services.length === 0 && (
+        {!loading && services.length === 0 && (
           <div className="empty-state-sm"><p>No hay servicios cargados todavía.</p></div>
         )}
       </div>
@@ -223,9 +240,9 @@ const ServiceManager = () => {
           </div>
 
           <div className="form-group">
-            <label>Imagen del servicio</label>
+            <label>Imagen del servicio (obligatoria)</label>
             {imagePreview && (
-              <div className="upload-preview">
+              <div className="service-image-preview">
                 <img src={imagePreview} alt="Vista previa" />
                 <button
                   type="button"
