@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { updateOwnProfile } from '../../api/profiles';
 import { User, Phone, Mail, Heart, AlertTriangle, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
 
 const Profile = () => {
   const { user, profile } = useAuth();
