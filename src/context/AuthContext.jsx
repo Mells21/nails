@@ -1,30 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/config';
-import { getUserProfile } from '../firebase/auth';
+import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
+// TODO: wire up Supabase auth here (session listener + user profile fetch).
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        const userProfile = await getUserProfile(firebaseUser.uid);
-        setProfile(userProfile);
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
+  const [user] = useState(null);
+  const [profile] = useState(null);
+  const [loading] = useState(false);
 
   const isAdmin = profile?.role === 'admin';
   const isClient = profile?.role === 'client';
