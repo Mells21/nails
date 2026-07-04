@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { registerClient } from '../firebase/auth';
+import { Link } from 'react-router-dom';
 import { Sparkles, Eye, EyeOff, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../utils/constants';
@@ -9,10 +8,10 @@ const Register = () => {
   const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // TODO: wire up Supabase auth (supabase.auth.signUp) + insert into a profiles table
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirm) {
@@ -25,15 +24,7 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await registerClient(form);
-      toast.success('¡Cuenta creada! Ya podés reservar tu cita 💅');
-      navigate('/reservar');
-    } catch (err) {
-      const msgs = {
-        'auth/email-already-in-use': 'Ese correo ya está registrado.',
-        'auth/weak-password': 'La contraseña es muy débil.',
-      };
-      toast.error(msgs[err.code] || 'Error al registrarse.');
+      toast.error('Registro no disponible: falta conectar el backend.');
     } finally {
       setLoading(false);
     }
