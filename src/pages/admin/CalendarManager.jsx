@@ -3,7 +3,7 @@ import { getScheduleForDates, saveSchedule } from '../../api/schedule';
 import { getMondayOf, toDateStr, getWeekDays } from '../../utils/dates';
 import { addWeeks, subWeeks } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus, Trash2, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
 
 const DEFAULT_DAY = { enabled: false, start: '09:00', end: '18:00', breaks: [] };
 
@@ -77,11 +77,11 @@ const CalendarManager = () => {
 
       <div className="week-nav">
         <button className="btn btn-ghost" onClick={() => setCurrentMonday(subWeeks(currentMonday, 1))}>
-          <ChevronLeft size={18} /> Semana anterior
+          <ChevronLeft size={18} /> <span>Semana anterior</span>
         </button>
         <span className="week-label">{mondayStr}</span>
         <button className="btn btn-ghost" onClick={() => setCurrentMonday(addWeeks(currentMonday, 1))}>
-          Siguiente semana <ChevronRight size={18} />
+          <span>Siguiente semana</span> <ChevronRight size={18} />
         </button>
       </div>
 
@@ -129,9 +129,15 @@ const CalendarManager = () => {
 
                       <div className="breaks-section">
                         <div className="breaks-header">
-                          <span>Bloqueos / Descansos</span>
-                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => addBreak(dateStr)}>
-                            <Plus size={14} /> Agregar
+                          <span>Descansos</span>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => addBreak(dateStr)}
+                            aria-label="Agregar descanso"
+                            title="Agregar descanso"
+                          >
+                            <Plus size={14} />
                           </button>
                         </div>
                         {(day.breaks || []).map((br, bi) => (
@@ -151,6 +157,8 @@ const CalendarManager = () => {
                               type="button"
                               className="btn btn-ghost btn-sm"
                               onClick={() => removeBreak(dateStr, bi)}
+                              aria-label="Quitar descanso"
+                              title="Quitar descanso"
                             >
                               <Trash2 size={14} />
                             </button>
