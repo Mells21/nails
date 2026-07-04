@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { uploadPaymentProof } from '../../firebase/storage';
-import { submitPaymentProof } from '../../firebase/appointments';
-import { Upload, CreditCard, CheckCircle } from 'lucide-react';
+import { Upload, CreditCard } from 'lucide-react';
 import { formatPrice } from '../../utils/dates';
 import { SALON_INFO } from '../../utils/constants';
 import toast from 'react-hot-toast';
 
-const ManualPayment = ({ appointmentId, amount, onSuccess }) => {
+// TODO: upload payment proof + submit via Supabase
+const ManualPayment = ({ amount }) => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -26,27 +24,11 @@ const ManualPayment = ({ appointmentId, amount, onSuccess }) => {
     }
     setUploading(true);
     try {
-      const url = await uploadPaymentProof(file, appointmentId);
-      await submitPaymentProof(appointmentId, url);
-      setDone(true);
-      onSuccess?.();
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al subir el comprobante.');
+      toast.error('Envío no disponible: falta conectar el backend.');
     } finally {
       setUploading(false);
     }
   };
-
-  if (done) {
-    return (
-      <div className="payment-success">
-        <CheckCircle size={48} className="success-icon" />
-        <h3>¡Comprobante enviado!</h3>
-        <p>La dueña revisará tu pago y confirmará la cita pronto. 🎉</p>
-      </div>
-    );
-  }
 
   return (
     <div className="manual-payment">
