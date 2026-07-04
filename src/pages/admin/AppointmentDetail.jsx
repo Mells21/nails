@@ -1,31 +1,64 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  getAppointment,
+  updateAppointmentStatus,
+  confirmManualPayment,
+  cancelAppointment,
+} from '../../api/appointments';
+import { getSignedUrl } from '../../api/storage';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { buildConfirmationMessage, buildReminderMessage, openWhatsApp } from '../../utils/whatsapp';
 import { MessageCircle, ArrowLeft, Check, X, AlertTriangle, Image } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// TODO: fetch/update appointment via Supabase
 const AppointmentDetail = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [apt] = useState(null);
-  const [loading] = useState(false);
+  const [apt, setApt] = useState(null);
+  const [referencePhotoUrls, setReferencePhotoUrls] = useState([]);
+  const [paymentProofSignedUrl, setPaymentProofSignedUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
 
-  const notAvailable = () => toast.error('Función no disponible: falta conectar el backend.');
+  const reload = () => {
+    setLoading(true);
+    getAppointment(id)
+      .then(async (data) => {
+        setApt(data);
+        const [photoUrls, proofUrl] = await Promise.all([
+          Promise.all((data.referencePhotos || []).map((path) => getSignedUrl('reference-photos', path).catch(() => null))),
+          data.paymentProofUrl ? getSignedUrl('payment-proofs', data.paymentProofUrl).catch(() => null) : null,
+        ]);
+        setReferencePhotoUrls(photoUrls.filter(Boolean));
+        setPaymentProofSignedUrl(proofUrl);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { reload(); }, [id]);
 
   const handleConfirm = async () => {
     setActing(true);
     try {
-      notAvailable();
+      await confirmManualPayment(id);
+      toast.success('Cita confirmada ✅');
+      reload();
+    } catch (err) {
+      toast.error(err.message || 'Error al confirmar.');
     } finally { setActing(false); }
   };
 
   const handleComplete = async () => {
     setActing(true);
     try {
-      notAvailable();
+      await updateAppointmentStatus(id, 'completed');
+      toast.success('Cita marcada como completada');
+      reload();
+    } catch (err) {
+      toast.error(err.message || 'Error al actualizar.');
     } finally { setActing(false); }
   };
 
@@ -33,14 +66,22 @@ const AppointmentDetail = () => {
     if (!confirm('¿Segura que querés cancelar esta cita?')) return;
     setActing(true);
     try {
-      notAvailable();
+      await cancelAppointment(id);
+      toast.success('Cita cancelada');
+      reload();
+    } catch (err) {
+      toast.error(err.message || 'Error al cancelar.');
     } finally { setActing(false); }
   };
 
   const handleNoShow = async () => {
     setActing(true);
     try {
-      notAvailable();
+      await updateAppointmentStatus(id, 'no_show');
+      toast.success('Registrado como inasistencia');
+      reload();
+    } catch (err) {
+      toast.error(err.message || 'Error al actualizar.');
     } finally { setActing(false); }
   };
 
@@ -95,11 +136,11 @@ const AppointmentDetail = () => {
         </div>
 
         {/* Reference photos */}
-        {apt.referencePhotos?.length > 0 && (
+        {referencePhotoUrls.length > 0 && (
           <div className="detail-card full-width">
             <h3><Image size={18} /> Fotos de referencia</h3>
             <div className="reference-photos-grid">
-              {apt.referencePhotos.map((url, i) => (
+              {referencePhotoUrls.map((url, i) => (
                 <a key={i} href={url} target="_blank" rel="noreferrer">
                   <img src={url} alt={`Referencia ${i + 1}`} className="reference-thumb" />
                 </a>
@@ -109,11 +150,11 @@ const AppointmentDetail = () => {
         )}
 
         {/* Payment proof */}
-        {apt.paymentProofUrl && (
+        {paymentProofSignedUrl && (
           <div className="detail-card full-width">
             <h3>🧾 Comprobante de pago</h3>
-            <a href={apt.paymentProofUrl} target="_blank" rel="noreferrer">
-              <img src={apt.paymentProofUrl} alt="Comprobante" className="proof-thumb" />
+            <a href={paymentProofSignedUrl} target="_blank" rel="noreferrer">
+              <img src={paymentProofSignedUrl} alt="Comprobante" className="proof-thumb" />
             </a>
           </div>
         )}
