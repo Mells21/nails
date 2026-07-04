@@ -1,16 +1,33 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getClientAppointments } from '../../api/appointments';
+import { getAdminPhone } from '../../api/profiles';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
-import { Calendar, Clock, Scissors, MessageCircle } from 'lucide-react';
-import { buildConfirmationMessage, openWhatsApp } from '../../utils/whatsapp';
+import { Calendar, Clock, Scissors, MessageCircle, AlertCircle } from 'lucide-react';
+import { buildConfirmationMessage, buildAdminNotificationMessage, openWhatsApp } from '../../utils/whatsapp';
 import { SALON_INFO } from '../../utils/constants';
 
-// TODO: fetch client appointments from Supabase
+const NEEDS_ADMIN_NOTICE = ['pending_payment', 'pending_validation'];
+
 const MyAppointments = () => {
-  const { profile } = useAuth();
-  const [appointments] = useState([]);
-  const [loading] = useState(false);
+  const { user, profile } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adminPhone, setAdminPhone] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getClientAppointments(user.id)
+      .then(setAppointments)
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  useEffect(() => {
+    getAdminPhone().then(setAdminPhone).catch(() => setAdminPhone(null));
+  }, []);
+
+  const contactPhone = adminPhone || SALON_INFO.whatsapp;
 
   const handleWhatsApp = (apt) => {
     const msg = buildConfirmationMessage({
@@ -21,6 +38,18 @@ const MyAppointments = () => {
       address: SALON_INFO.address,
     });
     openWhatsApp(SALON_INFO.whatsapp, msg);
+  };
+
+  const handleNotifyAdmin = (apt) => {
+    const msg = buildAdminNotificationMessage({
+      clientName: profile?.name,
+      clientPhone: profile?.phone,
+      date: apt.date,
+      time: apt.time,
+      service: apt.serviceName,
+      price: apt.servicePrice,
+    });
+    openWhatsApp(contactPhone, msg);
   };
 
   if (loading) return <div className="page-loading"><div className="spinner" /></div>;
@@ -58,6 +87,17 @@ const MyAppointments = () => {
                 </div>
                 <div className="apt-price">{formatPrice(apt.servicePrice)}</div>
               </div>
+              {NEEDS_ADMIN_NOTICE.includes(apt.status) && (
+                <div className="apt-notice">
+                  <p><AlertCircle size={14} /> Recordá avisarle a la dueña para que valide tu cita más rápido.</p>
+                  <button
+                    className="btn btn-whatsapp btn-sm apt-wa-btn"
+                    onClick={() => handleNotifyAdmin(apt)}
+                  >
+                    <MessageCircle size={14} /> Avisar a la dueña por WhatsApp
+                  </button>
+                </div>
+              )}
               {apt.status === 'confirmed' && (
                 <button
                   className="btn btn-outline btn-sm apt-wa-btn"
