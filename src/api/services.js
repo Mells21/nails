@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { toWebP } from '../utils/imageOptimize';
 
 const BUCKET = 'catalog';
 
@@ -127,8 +128,8 @@ export const removeServiceImage = async (serviceId) => {
  * se borra del storage para no dejar archivos huérfanos.
  */
 export const uploadServiceImage = async (file, serviceId) => {
-  const ext = file.name.split('.').pop();
-  const path = `${serviceId}.${ext}`;
+  const webpFile = await toWebP(file);
+  const path = `${serviceId}.webp`;
 
   const { data: existing } = await supabase.from('services').select('image_url').eq('id', serviceId).single();
   const oldPath = getStoragePath(existing?.image_url);
@@ -139,7 +140,7 @@ export const uploadServiceImage = async (file, serviceId) => {
   const { error: uploadError } = await supabase
     .storage
     .from(BUCKET)
-    .upload(path, file, { upsert: true });
+    .upload(path, webpFile, { upsert: true });
   if (uploadError) throw uploadError;
 
   const { data: publicUrlData } = supabase.storage.from(BUCKET).getPublicUrl(path);
