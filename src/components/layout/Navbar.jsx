@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { logout } from '../../api/auth';
-import { Sparkles, LogOut, Calendar, User, LayoutDashboard } from 'lucide-react';
+import { LogOut, Calendar, User, LayoutDashboard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SALON_INFO } from '../../utils/constants';
 
@@ -19,7 +19,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" className="brand-link">
-          <Sparkles size={22} className="brand-icon" />
+          <img src="/images/marca.jpg" alt="" className="brand-icon" />
           <span>{SALON_INFO.name}</span>
         </Link>
       </div>
