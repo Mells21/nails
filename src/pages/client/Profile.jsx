@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { updateClientProfile } from '../../firebase/clients';
 import { User, Phone, Mail, Heart, AlertTriangle, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// TODO: update client profile via Supabase
 const Profile = () => {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [form, setForm] = useState({
     name: profile?.name || '',
     phone: profile?.phone || '',
@@ -21,10 +21,7 @@ const Profile = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateClientProfile(user.uid, form);
-      toast.success('Perfil actualizado ✅');
-    } catch {
-      toast.error('Error al guardar.');
+      toast.error('Guardado no disponible: falta conectar el backend.');
     } finally {
       setSaving(false);
     }
