@@ -6,12 +6,15 @@ import { formatPrice, toReadableDate } from '../../utils/dates';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import { Search, MessageCircle, ChevronRight, Save, Heart, AlertTriangle, Phone, Mail } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
+import { ClientCardSkeleton } from '../../components/ui/CardSkeletons';
+import Skeleton from '../../components/ui/Skeleton';
 
 const ClientsCRM = () => {
   const [clients, setClients] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
   const [clientHistory, setClientHistory] = useState([]);
@@ -26,12 +29,17 @@ const ClientsCRM = () => {
   }, []);
 
   useEffect(() => {
-    if (!search) { setFiltered(clients); return; }
+    const timer = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    if (!debouncedSearch) { setFiltered(clients); return; }
     setFiltered(clients.filter((c) =>
-      c.name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone?.includes(search)
+      c.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      c.phone?.includes(debouncedSearch)
     ));
-  }, [search, clients]);
+  }, [debouncedSearch, clients]);
 
   const openClient = async (client) => {
     setSelectedClient(client);
@@ -55,13 +63,11 @@ const ClientsCRM = () => {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <div className="page-loading"><div className="spinner" /></div>;
-
   return (
     <div className="admin-page">
       <div className="page-header">
         <h1>Clientas</h1>
-        <p>{clients.length} registradas</p>
+        {loading ? <Skeleton className="skeleton-text" style={{ width: 90 }} /> : <p>{clients.length} registradas</p>}
       </div>
 
       <div className="filters-bar">
@@ -72,12 +78,14 @@ const ClientsCRM = () => {
             placeholder="Buscar por nombre o teléfono..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            disabled={loading}
           />
         </div>
       </div>
 
       <div className="clients-list">
-        {filtered.map((client) => (
+        {loading && Array.from({ length: 5 }).map((_, i) => <ClientCardSkeleton key={i} />)}
+        {!loading && filtered.map((client) => (
           <div key={client.id} className="client-card">
             <div className="client-avatar">
               {client.name?.[0]?.toUpperCase()}
@@ -103,7 +111,7 @@ const ClientsCRM = () => {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div className="empty-state-sm"><p>No se encontraron clientas.</p></div>}
+        {!loading && filtered.length === 0 && <div className="empty-state-sm"><p>No se encontraron clientas.</p></div>}
       </div>
 
       {/* Client detail modal */}
