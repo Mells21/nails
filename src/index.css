@@ -282,6 +282,7 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .page-header { margin-bottom: 28px; }
 .page-header h1 { font-family: 'Playfair Display', serif; font-size: 32px; }
 .page-header p { color: var(--text-secondary); margin-top: 4px; }
+.page-header-actions { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
 .page-container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
 .admin-page { padding: 32px; max-width: 1100px; }
 
@@ -383,7 +384,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
   transition: var(--transition);
 }
 .service-card:hover { border-color: var(--pink-400); background: var(--dark-700); }
-.service-emoji { font-size: 32px; flex-shrink: 0; }
+.service-emoji { color: var(--pink-400); flex-shrink: 0; }
+.service-card-thumb { width: 56px; height: 56px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0; }
 .service-info h3 { font-size: 15px; margin-bottom: 4px; }
 .service-info p  { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
 .service-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -524,7 +526,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .service-option:hover { border-color: var(--service-color, var(--pink-400)); transform: translateY(-2px); }
 .service-option.selected { border-color: var(--service-color, var(--pink-400)); background: var(--dark-700); box-shadow: 0 0 0 4px rgba(236,72,153,0.1); }
 .service-option-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-.service-option-emoji { font-size: 28px; }
+.service-option-icon { color: var(--service-color, var(--pink-400)); }
+.service-option-thumb { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; }
 .service-check {
   background: var(--success); color: #fff;
   width: 20px; height: 20px; border-radius: 50%;
@@ -638,6 +641,12 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .apt-price { color: var(--pink-400); font-weight: 700; margin-left: auto; }
 .apt-date, .apt-time { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
 .apt-wa-btn { align-self: flex-start; }
+.apt-notice {
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+  background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.25);
+  border-radius: var(--radius-md); padding: 12px 14px;
+}
+.apt-notice p { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
 
 /* ========================================
    STATS / DASHBOARD
@@ -779,12 +788,19 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .info-banner code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
 .services-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 .service-admin-card { background: var(--dark-800); border: 1px solid var(--dark-600); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.service-admin-card.service-inactive { opacity: 0.5; }
 .service-admin-header { display: flex; align-items: center; gap: 12px; }
-.service-admin-emoji { font-size: 28px; }
+.service-admin-thumb { width: 44px; height: 44px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0; }
+.service-admin-icon {
+  width: 44px; height: 44px; border-radius: var(--radius-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--dark-700); color: var(--pink-400);
+}
 .service-admin-header h3 { font-size: 15px; }
 .service-admin-desc { font-size: 13px; color: var(--text-secondary); }
 .service-admin-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); }
 .service-admin-meta span { display: flex; align-items: center; gap: 6px; }
+.service-admin-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; flex-wrap: wrap; }
 
 /* ========================================
    MY APPOINTMENTS / PROFILE
