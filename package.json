@@ -7,17 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize-images": "node scripts/convert-images.mjs"
   },
   "dependencies": {
     "@mercadopago/sdk-react": "^1.0.7",
     "@supabase/supabase-js": "^2.110.0",
     "date-fns": "^4.4.0",
+    "gooey-toast": "^0.2.2",
     "gsap": "^3.15.0",
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
@@ -25,6 +26,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "oxlint": "^1.71.0",
+    "sharp": "^0.35.3",
     "vite": "^8.1.1"
   }
 }

@@ -7,6 +7,7 @@ import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { Calendar, Clock, Scissors, MessageCircle, AlertCircle } from 'lucide-react';
 import { buildConfirmationMessage, buildAdminNotificationMessage, openWhatsApp } from '../../utils/whatsapp';
 import { SALON_INFO } from '../../utils/constants';
+import { AppointmentCardSkeleton } from '../../components/ui/CardSkeletons';
 
 const NEEDS_ADMIN_NOTICE = ['pending_payment', 'pending_validation'];
 
@@ -52,8 +53,6 @@ const MyAppointments = () => {
     openWhatsApp(contactPhone, msg);
   };
 
-  if (loading) return <div className="page-loading"><div className="spinner" /></div>;
-
   return (
     <div className="page-container">
       <div className="page-header">
@@ -61,7 +60,11 @@ const MyAppointments = () => {
         <p>Historial completo de tus reservas</p>
       </div>
 
-      {appointments.length === 0 ? (
+      {loading ? (
+        <div className="appointments-list">
+          {Array.from({ length: 3 }).map((_, i) => <AppointmentCardSkeleton key={i} />)}
+        </div>
+      ) : appointments.length === 0 ? (
         <div className="empty-state">
           <Calendar size={48} className="empty-emoji" />
           <h3>No tenés citas todavía</h3>

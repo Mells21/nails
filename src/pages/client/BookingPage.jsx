@@ -11,7 +11,7 @@ import BookingSummary from '../../components/booking/BookingSummary';
 import ManualPayment from '../../components/payment/ManualPayment';
 import { buildAdminNotificationMessage } from '../../utils/whatsapp';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
 
 const STEPS = ['Servicio', 'Fecha y hora', 'Fotos', 'Pago'];
 

@@ -11,7 +11,10 @@ import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { buildConfirmationMessage, buildReminderMessage, openWhatsApp } from '../../utils/whatsapp';
 import { MessageCircle, ArrowLeft, Check, X, AlertTriangle, Image, User, Phone, Mail, Scissors, Calendar, Clock, DollarSign, Receipt } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
+import { DetailCardSkeleton } from '../../components/ui/CardSkeletons';
+import Skeleton from '../../components/ui/Skeleton';
+import { confirmAction } from '../../utils/confirmToast';
 
 const AppointmentDetail = () => {
   const { id } = useParams();
@@ -62,16 +65,22 @@ const AppointmentDetail = () => {
     } finally { setActing(false); }
   };
 
-  const handleCancel = async () => {
-    if (!confirm('¿Segura que querés cancelar esta cita?')) return;
-    setActing(true);
-    try {
-      await cancelAppointment(id);
-      toast.success('Cita cancelada');
-      reload();
-    } catch (err) {
-      toast.error(err.message || 'Error al cancelar.');
-    } finally { setActing(false); }
+  const handleCancel = () => {
+    confirmAction({
+      title: '¿Cancelar esta cita?',
+      description: 'Esta acción no se puede deshacer.',
+      confirmLabel: 'Cancelar cita',
+      onConfirm: async () => {
+        setActing(true);
+        try {
+          await cancelAppointment(id);
+          toast.success('Cita cancelada');
+          reload();
+        } catch (err) {
+          toast.error(err.message || 'Error al cancelar.');
+        } finally { setActing(false); }
+      },
+    });
   };
 
   const handleNoShow = async () => {
@@ -105,7 +114,20 @@ const AppointmentDetail = () => {
     openWhatsApp(apt.clientPhone, msg);
   };
 
-  if (loading) return <div className="page-loading"><div className="spinner" /></div>;
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <Skeleton style={{ width: 130, height: 30, marginBottom: 20 }} />
+        <div className="page-header">
+          <h1>Ficha de la cita</h1>
+        </div>
+        <div className="detail-grid">
+          <DetailCardSkeleton />
+          <DetailCardSkeleton />
+        </div>
+      </div>
+    );
+  }
   if (!apt) return <div className="page-container"><p>Cita no encontrada.</p></div>;
 
   return (
@@ -163,36 +185,47 @@ const AppointmentDetail = () => {
       {/* Actions */}
       <div className="detail-actions">
         <h3>Acciones</h3>
-        <div className="actions-row">
-          {apt.status === 'pending_validation' && (
-            <button className="btn btn-success" onClick={handleConfirm} disabled={acting}>
-              <Check size={16} /> Confirmar pago
-            </button>
-          )}
-          {apt.status === 'confirmed' && (
-            <button className="btn btn-primary" onClick={handleComplete} disabled={acting}>
-              <Check size={16} /> Marcar completada
-            </button>
-          )}
-          {['confirmed', 'pending_validation', 'pending_payment'].includes(apt.status) && (
-            <>
-              <button className="btn btn-outline" onClick={handleNoShow} disabled={acting}>
-                <AlertTriangle size={16} /> No asistió
-              </button>
-              <button className="btn btn-danger" onClick={handleCancel} disabled={acting}>
-                <X size={16} /> Cancelar cita
-              </button>
-            </>
-          )}
-        </div>
 
-        <div className="actions-row">
-          <button className="btn btn-whatsapp" onClick={sendConfirmation}>
-            <MessageCircle size={16} /> Enviar confirmación WA
-          </button>
-          <button className="btn btn-whatsapp-outline" onClick={sendReminder}>
-            <MessageCircle size={16} /> Enviar recordatorio WA
-          </button>
+        <div className="actions-columns">
+          {['pending_validation', 'confirmed', 'pending_payment'].includes(apt.status) && (
+            <div className="actions-group">
+              <h4>Estado de la cita</h4>
+              <div className="actions-row">
+                {apt.status === 'pending_validation' && (
+                  <button className="btn btn-success" onClick={handleConfirm} disabled={acting}>
+                    <Check size={16} /> Confirmar pago
+                  </button>
+                )}
+                {apt.status === 'confirmed' && (
+                  <button className="btn btn-primary" onClick={handleComplete} disabled={acting}>
+                    <Check size={16} /> Marcar completada
+                  </button>
+                )}
+              </div>
+              {['confirmed', 'pending_validation', 'pending_payment'].includes(apt.status) && (
+                <div className="actions-row actions-row-secondary">
+                  <button className="btn btn-outline btn-sm" onClick={handleNoShow} disabled={acting}>
+                    <AlertTriangle size={14} /> No asistió
+                  </button>
+                  <button className="btn btn-outline-danger btn-sm" onClick={handleCancel} disabled={acting}>
+                    <X size={14} /> Cancelar cita
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="actions-group actions-group-whatsapp">
+            <h4><MessageCircle size={14} /> WhatsApp a la clienta</h4>
+            <div className="actions-row">
+              <button className="btn btn-whatsapp" onClick={sendConfirmation}>
+                <MessageCircle size={16} /> Confirmación
+              </button>
+              <button className="btn btn-whatsapp-outline" onClick={sendReminder}>
+                <MessageCircle size={16} /> Recordatorio
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

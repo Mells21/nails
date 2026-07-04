@@ -12,15 +12,15 @@ import { formatPrice, formatDuration } from '../utils/dates';
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 const GALLERY = [
-  { src: '/images/img13.jpg', tall: true },
-  { src: '/images/img1.jpg' },
-  { src: '/images/img11.jpg' },
-  { src: '/images/img6.jpg' },
-  { src: '/images/iimg7.jpg', tall: true },
-  { src: '/images/img12.jpg' },
-  { src: '/images/img3.jpg' },
-  { src: '/images/img19.jpg' },
-  { src: '/images/img15.jpg', tall: true },
+  { src: '/images/img13.webp', tall: true },
+  { src: '/images/img1.webp' },
+  { src: '/images/img11.webp' },
+  { src: '/images/img6.webp' },
+  { src: '/images/iimg7.webp', tall: true },
+  { src: '/images/img12.webp' },
+  { src: '/images/img3.webp' },
+  { src: '/images/img19.webp' },
+  { src: '/images/img15.webp', tall: true },
 ];
 
 const Landing = () => {
@@ -66,11 +66,11 @@ const Landing = () => {
           ease: 'sine.inOut',
         });
 
-      // Parallax bien marcado: las fotos del hero suben harto al bajar
-      // el scroll y vuelven a bajar si se sube (scrub las liga directo
-      // a la posición del scroll)
+      // Parallax: en desktop bien marcado, en mobile mucho más sutil
+      // porque las fotos son mucho más chicas y se notaba demasiado
+      const isMobile = window.innerWidth <= 768;
       gsap.to('.hero-photo-main', {
-        y: -280,
+        y: isMobile ? -90 : -280,
         ease: 'none',
         scrollTrigger: {
           trigger: '.hero',
@@ -80,7 +80,7 @@ const Landing = () => {
         },
       });
       gsap.to('.hero-photo-accent', {
-        y: -140,
+        y: isMobile ? -45 : -140,
         ease: 'none',
         scrollTrigger: {
           trigger: '.hero',
@@ -90,29 +90,49 @@ const Landing = () => {
         },
       });
 
-      gsap.utils.toArray('.features, .gallery-section, .services-section, .policy-section').forEach((section) => {
-        gsap.from(section, {
+      // Encabezados de sección y la tarjeta de políticas: aparecen
+      // a compás del scroll, no de golpe
+      gsap.utils.toArray('.features .section-header, .gallery-section .section-header, .services-section .section-header, .policy-card').forEach((el) => {
+        gsap.from(el, {
           opacity: 0,
-          y: 40,
-          duration: 0.8,
-          ease: 'power2.out',
+          y: 30,
+          ease: 'none',
           scrollTrigger: {
-            trigger: section,
-            start: 'top 82%',
+            trigger: el,
+            start: 'top 92%',
+            end: 'top 65%',
+            scrub: 0.6,
           },
         });
       });
 
-      gsap.utils.toArray('.gallery-item').forEach((item, i) => {
+      // Cards de features y servicios: cada una aparece a su propio
+      // ritmo a medida que se van revelando con el scroll
+      gsap.utils.toArray('.feature-card, .service-card').forEach((card) => {
+        gsap.from(card, {
+          opacity: 0,
+          y: 36,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 95%',
+            end: 'top 70%',
+            scrub: 0.6,
+          },
+        });
+      });
+
+      // Galería: cada foto se revela a compás del scroll
+      gsap.utils.toArray('.gallery-item').forEach((item) => {
         gsap.from(item, {
           opacity: 0,
-          y: 24,
-          duration: 0.6,
-          delay: (i % 4) * 0.08,
-          ease: 'power2.out',
+          y: 30,
+          ease: 'none',
           scrollTrigger: {
             trigger: item,
-            start: 'top 90%',
+            start: 'top 95%',
+            end: 'top 68%',
+            scrub: 0.6,
           },
         });
       });
@@ -127,7 +147,7 @@ const Landing = () => {
       <section className="hero">
         <div className="hero-content">
           <div className="hero-badge">
-            <img src="/images/marca.jpg" alt="" style={{ height: 18, width: 18, objectFit: 'contain' }} />
+            <img src="/images/marca.webp" alt="" style={{ height: 18, width: 18, objectFit: 'contain' }} />
             <span>Estudio de uñas en Rioja</span>
           </div>
           <h1 className="hero-title">
@@ -149,8 +169,8 @@ const Landing = () => {
           </div>
         </div>
         <div className="hero-visual">
-          <img src="/images/local-interior.jpg" alt="Interior de AuraNails" className="hero-photo-main" />
-          <img src="/images/local-mirror.jpg" alt="Recepción de AuraNails" className="hero-photo-accent" />
+          <img src="/images/local-interior.webp" alt="Interior de AuraNails" className="hero-photo-main" />
+          <img src="/images/local-mirror.webp" alt="Recepción de AuraNails" className="hero-photo-accent" />
         </div>
       </section>
 
@@ -239,7 +259,7 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="footer">
-        <img src="/images/marca.jpg" alt={SALON_INFO.name} />
+        <img src="/images/marca.webp" alt={SALON_INFO.name} />
         <span>{SALON_INFO.name}, hecho con cariño</span>
       </footer>
     </div>

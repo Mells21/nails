@@ -5,6 +5,7 @@ import { getAllClients } from '../../api/profiles';
 import Badge from '../../components/ui/Badge';
 import { toReadableDate, to12h, formatPrice } from '../../utils/dates';
 import { Calendar, Users, DollarSign, ClipboardList, Scissors, AlertTriangle, Sun } from 'lucide-react';
+import { StatCardSkeleton, AppointmentCardSkeleton } from '../../components/ui/CardSkeletons';
 
 const Dashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -34,8 +35,6 @@ const Dashboard = () => {
     { icon: DollarSign, label: 'Ingresos del mes', value: formatPrice(monthIncome), color: '#10b981', link: '/admin/citas' },
   ];
 
-  if (loading) return <div className="page-loading"><div className="spinner" /></div>;
-
   return (
     <div className="admin-dashboard">
       <div className="page-header">
@@ -44,15 +43,17 @@ const Dashboard = () => {
       </div>
 
       <div className="stats-grid">
-        {stats.map(({ icon: Icon, label, value, color, link }) => (
-          <Link key={label} to={link} className="stat-card" style={{ '--stat-color': color }}>
-            <div className="stat-icon"><Icon size={22} /></div>
-            <div className="stat-info">
-              <div className="stat-value">{value}</div>
-              <div className="stat-label">{label}</div>
-            </div>
-          </Link>
-        ))}
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          : stats.map(({ icon: Icon, label, value, color, link }) => (
+            <Link key={label} to={link} className="stat-card" style={{ '--stat-color': color }}>
+              <div className="stat-icon"><Icon size={22} /></div>
+              <div className="stat-info">
+                <div className="stat-value">{value}</div>
+                <div className="stat-label">{label}</div>
+              </div>
+            </Link>
+          ))}
       </div>
 
       {/* Today's appointments */}
@@ -61,7 +62,11 @@ const Dashboard = () => {
           <h2><Scissors size={20} /> Citas de hoy</h2>
           <Link to="/admin/citas" className="btn btn-outline btn-sm">Ver todas</Link>
         </div>
-        {todayApts.length === 0 ? (
+        {loading ? (
+          <div className="appointments-list">
+            {Array.from({ length: 3 }).map((_, i) => <AppointmentCardSkeleton key={i} />)}
+          </div>
+        ) : todayApts.length === 0 ? (
           <div className="empty-state-sm">
             <p>No hay citas programadas para hoy.</p>
           </div>

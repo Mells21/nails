@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Upload, X, Image } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../utils/toast';
 
 const MAX_FILES = 3;
 const MAX_SIZE_MB = 5;
